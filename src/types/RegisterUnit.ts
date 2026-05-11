@@ -4,7 +4,7 @@ export default interface RegisterUnit{
     registers: Register[];
 }
 
-// registers store values in string
+// registers store values in number but TODO: figure out if that even works
 export interface Register {
     value: number;
 }
