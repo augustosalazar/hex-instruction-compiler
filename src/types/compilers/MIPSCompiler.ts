@@ -3,26 +3,25 @@
 //    and defines the available operations from the architecture to be implemented.
 //  - in other words, every compiler knows how to read in its own terms.
 
-import type Compiler from "../abstracts/Compiler";
-import InstructionReturn from "../abstracts/InstructionReturn";
-import MemoryUnit from "../abstracts/MemoryUnit";
-import Program from "../abstracts/Program";
-import RegisterUnit from "../abstracts/RegisterUnit";
-import { ExecuteOutput, MemoryHandleOutput, RegWriteOutput } from "../abstracts/StepResults";
+import type {
+    Compiler,
+    InstructionReturn,
+    MemoryUnit,
+    Program,
+    RegisterUnit,
+    ExecuteOutput,
+    MemoryHandleOutput,
+    RegWriteOutput,
+    Instruction
+} from "../abstracts";
 
 export default class MIPSCompiler implements Compiler {
 
-    program: Program;
-
-    constructor(rawProgram: string) {
-        this.program = 
-    }
-
-    decodeWord(programCounter: number): Program {
+    decodeWord(programCounter: number): Instruction {
         throw new Error("Method not implemented.");
     }
 
-    executeInstruction(decodedWord: Program, registerUnit: RegisterUnit): ExecuteOutput {
+    executeInstruction(decodedWord: Instruction, registerUnit: RegisterUnit): ExecuteOutput {
         throw new Error("Method not implemented.");
     }
 

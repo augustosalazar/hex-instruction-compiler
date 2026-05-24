@@ -1,9 +1,9 @@
-import type RegisterUnit from './RegisterUnit';
-import type InstructionReturn from './InstructionReturn';
-import type Program from './Program';
-import type Instruction from './Program';
-import type { ExecuteOutput, MemoryHandleOutput, RegWriteOutput } from './StepResults';
+import { InstructionReturn } from './InstructionReturn';
+import { Instruction } from './Program';
+import { ExecuteOutput, MemoryHandleOutput, RegWriteOutput } from './StepResults';
+
 import MemoryUnit from './MemoryUnit';
+import RegisterUnit from './RegisterUnit';
 
 // compiler interface.
 // describes the minimal methods and attributes a compiler needs to be used by the central 'compile' function.
@@ -16,8 +16,7 @@ import MemoryUnit from './MemoryUnit';
 // in turn, the Compiler is to return any sort of InstructionReturn, which tells the 'compile' function
 // what the result is and what to do with it.
 
-export default interface Compiler {
-    program: Program; //Memoria de instrucciones
+export interface Compiler {
 
     //Se dice que cada Compilador sabe:
     decodeWord(programCounter: number): Instruction; //1. 'Leer' o Decodificar cada palabra del Programa

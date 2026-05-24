@@ -1,34 +1,41 @@
+/*
+
+import type { ExecutionContext } from "../../types/abstracts";
+import { alu } from "../../core";
+
 export const semantics = {
-    ADD(ctx) {
-        const a = ctx.registers.read(ctx.rs);
-        const b = ctx.registers.read(ctx.rt);
+    ADD(ctx: ExecutionContext) {
+        const a = ctx.state.registers.read(ctx.rs);
+        const b = ctx.state.registers.read(ctx.rt);
 
         const result = alu.add(a, b);
 
-        ctx.registers.write(ctx.rd, result);
+        ctx.state.registers.write(ctx.rd, result);
     },
-    SUB(ctx) {
-        const a = ctx.registers.read(ctx.rs);
-        const b = ctx.registers.read(ctx.rt);
+    SUB(ctx: ExecutionContext) {
+        const a = ctx.state.registers.read(ctx.rs);
+        const b = ctx.state.registers.read(ctx.rt);
 
         const result = alu.sub(a, b);
 
-        ctx.registers.write(ctx.rd, result);
+        ctx.state.registers.write(ctx.rd, result);
     },
-    AND(ctx) {
-        const a = ctx.registers.read(ctx.rs);
-        const b = ctx.registers.read(ctx.rt);
+    AND(ctx: ExecutionContext) {
+        const a = ctx.state.registers.read(ctx.rs);
+        const b = ctx.state.registers.read(ctx.rt);
 
         const result = alu.and(a, b);
 
-        ctx.registers.write(ctx.rd, result);
+        ctx.state.registers.write(ctx.rd, result);
     },
-    OR(ctx) {
-        const a = ctx.registers.read(ctx.rs);
-        const b = ctx.registers.read(ctx.rt);
+    OR(ctx: ExecutionContext) {
+        const a = ctx.state.registers.read(ctx.rs);
+        const b = ctx.state.registers.read(ctx.rt);
 
         const result = alu.or(a, b);
 
         ctx.registers.write(ctx.rd, result);
     },
 }
+
+*/

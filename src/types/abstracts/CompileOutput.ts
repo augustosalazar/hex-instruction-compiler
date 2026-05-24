@@ -1,9 +1,9 @@
-import InstructionReturn from "./InstructionReturn";
-import type RegisterUnit from "./RegisterUnit";
+import { InstructionReturn } from "./InstructionReturn";
+import { default as RegisterUnit } from "./RegisterUnit";
 
 //the return type for every main 'compile' function. (/core folder)
 
-export default interface CompileOutput {
+export interface CompileOutput {
     registryState: RegisterUnit | null,
     cycles: number | null,
     time: number | null,

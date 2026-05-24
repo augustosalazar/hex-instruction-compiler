@@ -1,7 +1,7 @@
-import type { InstructionDefinition } from "@/types/isa";
+import type { InstructionDefinition } from "../../types/isa";
 import { R_TYPE } from "./formats";
 
-const ADD: InstructionDefinition = {
+export const ADD: InstructionDefinition = {
     semantic: "ADD",
     format: R_TYPE,
     pattern: {

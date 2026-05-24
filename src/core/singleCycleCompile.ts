@@ -1,9 +1,21 @@
-import type Compiler from "../types/abstracts/Compiler";
-import type CompileOutput from "../types/abstracts/CompileOutput";
+import type { Compiler, CompileOutput, ExecutionContext, Program, RegisterUnit } from "../types/abstracts";
 
 // correr el Programa dentro del Compilador de manera secuencial
-export function singleCycleCompile(compiler: Compiler, savePipelineState: boolean): CompileOutput {
-    var output: CompileOutput = { registryState: null, time: null, cycles: null };
+export function singleCycleCompile(
+    compiler: Compiler,
+    program: Program,
+    ctx: ExecutionContext
+): CompileOutput {
+    while (ctx.pc < program.instructions.length) {
 
-    return output;
+        const x = compiler.instructionCycle(ctx.registers, ctx.pc);
+
+    }
+
+    return {
+        registryState: null,
+        time: null,
+        cycles: null,
+    }
 }
+
