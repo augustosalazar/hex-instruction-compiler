@@ -1,6 +1,6 @@
 // a Program is an array of Instructions. 
 // every Compiler is supposed to build its own Program using an input string (space separated hex words)
-export default interface Program {
+export interface Program {
     instructions: Instruction[];
 }
 
