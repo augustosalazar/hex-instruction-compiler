@@ -1,7 +1,7 @@
 import { Word } from "./word.type";
 
 //very similar to RegisterUnit
-export class MemoryUnit {
+export default class MemoryUnit {
     readonly wordSize: number;
     readonly addresses: number;
 

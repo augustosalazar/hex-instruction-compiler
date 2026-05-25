@@ -1,9 +1,7 @@
 import { InstructionReturn } from './InstructionReturn';
-import { Instruction } from './Program';
-import { ExecuteOutput, MemoryHandleOutput, RegWriteOutput } from './StepResults';
-
-import MemoryUnit from './MemoryUnit';
-import RegisterUnit from './RegisterUnit';
+import { Instruction, Program } from './Program';
+import { ExecuteOutput, MemoryOutput } from './StepResults';
+import { ExecutionContext } from './execution-context.interface';
 
 // compiler interface.
 // describes the minimal methods and attributes a compiler needs to be used by the central 'compile' function.
@@ -18,14 +16,21 @@ import RegisterUnit from './RegisterUnit';
 
 export interface Compiler {
 
-    //Se dice que cada Compilador sabe:
-    decodeWord(programCounter: number): Instruction; //1. 'Leer' o Decodificar cada palabra del Programa
-    executeInstruction(decodedWord: Instruction, registerUnit: RegisterUnit): ExecuteOutput; //2. Ejecutar la palabra decodificada
-    memoryHandle(address: ExecuteOutput, memoryUnit: MemoryUnit): MemoryHandleOutput;//3. Guardar o Sacar de memoria
-    registerWriteFromMem(data: MemoryHandleOutput, registerUnit: RegisterUnit): RegWriteOutput;//4.a. Escribir a registro algo de memoria
-    registerWriteFromExec(data: ExecuteOutput, registerUnit: RegisterUnit): RegWriteOutput;// 4.b. Escribir a registro algo de exec
-    //Se asume que registerWrite sería lo último en ejecutarse en un ciclo completo de ejecución
+    // 1. IF (Instruction Fetch)
+    fetch(program: Program, ctx: ExecutionContext): number;
 
-    // Esta funcion debería ejecutar las funciones de arriba con la secuencia/logica especifica a la arquitectura
-    instructionCycle(registerUnit: RegisterUnit, programCounter: number,): InstructionReturn;
+    // 2. ID (Instruction Decode)
+    decode(word: number, ctx: ExecutionContext): Instruction;
+
+    // 3. EX (Execute)
+    execute(decoded: Instruction, ctx: ExecutionContext): ExecuteOutput;
+
+    // 4. MEM (Memory Access)
+    memoryAccess(execResult: ExecuteOutput, ctx: ExecutionContext): MemoryOutput;
+
+    // 5. WB (Write Back)
+    writeback(memResult: MemoryOutput, ctx: ExecutionContext): void;
+
+    // Orchestrator for the cycle
+    instructionCycle(program: Program, ctx: ExecutionContext): InstructionReturn;
 }

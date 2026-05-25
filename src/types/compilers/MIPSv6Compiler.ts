@@ -6,40 +6,36 @@
 import type {
     Compiler,
     InstructionReturn,
-    MemoryUnit,
     Program,
-    RegisterUnit,
     ExecuteOutput,
-    MemoryHandleOutput,
-    RegWriteOutput,
-    Instruction
+    MemoryOutput,
+    Instruction,
+    ExecutionContext
 } from "../abstracts";
 
-export default class MIPSCompiler implements Compiler {
+export default class MIPSv6Compiler implements Compiler {
 
-    decodeWord(programCounter: number): Instruction {
+    fetch(program: Program, ctx: ExecutionContext): number {
         throw new Error("Method not implemented.");
     }
 
-    executeInstruction(decodedWord: Instruction, registerUnit: RegisterUnit): ExecuteOutput {
+    decode(word: number, ctx: ExecutionContext): Instruction {
         throw new Error("Method not implemented.");
     }
 
-    memoryHandle(address: ExecuteOutput, memoryUnit: MemoryUnit): MemoryHandleOutput {
+    execute(decoded: Instruction, ctx: ExecutionContext): ExecuteOutput {
         throw new Error("Method not implemented.");
     }
 
-    registerWriteFromMem(data: MemoryHandleOutput, registerUnit: RegisterUnit): RegWriteOutput {
+    memoryAccess(execResult: ExecuteOutput, ctx: ExecutionContext): MemoryOutput {
         throw new Error("Method not implemented.");
     }
 
-    registerWriteFromExec(data: ExecuteOutput, registerUnit: RegisterUnit): RegWriteOutput {
+    writeback(memResult: MemoryOutput, ctx: ExecutionContext): void {
         throw new Error("Method not implemented.");
     }
 
-    instructionCycle(registerUnit: RegisterUnit, programCounter: number): InstructionReturn {
+    instructionCycle(program: Program, ctx: ExecutionContext): InstructionReturn {
         throw new Error("Method not implemented.");
     }
-
-
 }

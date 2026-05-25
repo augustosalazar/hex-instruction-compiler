@@ -1,4 +1,4 @@
-import type { Compiler, CompileOutput, ExecutionContext, Program, RegisterUnit } from "../types/abstracts";
+import type { Compiler, CompileOutput, ExecutionContext, Program, InstructionReturn } from "../types/abstracts";
 
 // correr el Programa dentro del Compilador de manera secuencial
 export function singleCycleCompile(
@@ -8,7 +8,7 @@ export function singleCycleCompile(
 ): CompileOutput {
     while (ctx.pc < program.instructions.length) {
 
-        const x = compiler.instructionCycle(ctx.registers, ctx.pc);
+        const x: InstructionReturn = compiler.instructionCycle(program, ctx);
 
     }
 
