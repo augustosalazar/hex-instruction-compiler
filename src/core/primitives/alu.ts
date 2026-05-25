@@ -155,4 +155,12 @@ export default class alu {
 
         return unsignedA - unsignedB;
     }
+
+    static nor(a: number, b: number): number {
+        //Se convierte a enteros con signo de 32 bits con '| 0'
+        const signedA = a | 0;
+        const signedB = b | 0;
+
+        return ~(signedA | signedB);
+    }
 }
