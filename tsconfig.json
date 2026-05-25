@@ -3,19 +3,15 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-
     "module": "commonjs",
     "target": "esnext",
-
     // Other Outputs
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
-
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
-
     // Style Options
     // "noImplicitReturns": true,
     // "noImplicitOverride": true,
@@ -23,7 +19,6 @@
     // "noUnusedParameters": true,
     // "noFallthroughCasesInSwitch": true,
     // "noPropertyAccessFromIndexSignature": true,
-
     // Recommended Options
     "strict": true,
     "verbatimModuleSyntax": false,
@@ -32,5 +27,6 @@
     "moduleDetection": "force",
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "ignoreDeprecations": "6.0" //This is temporarily here to silence the warning. 
   },
 }
