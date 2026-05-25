@@ -1,8 +1,9 @@
-// MIPS compiler class. 
-//  - every class implements the 'Compiler' class
 //    and defines the available operations from the architecture to be implemented.
 //  - in other words, every compiler knows how to read in its own terms.
 
+import { extractBits } from "../../helpers/bits.helper";
+import { decodeByFormat } from "../../helpers/instruction.helper";
+import { INSTRUCTION_DEFINITIONS } from "../../isa/mipsv6";
 import type {
     Compiler,
     InstructionReturn,
@@ -16,11 +17,45 @@ import type {
 export default class MIPSv6Compiler implements Compiler {
 
     fetch(program: Program, ctx: ExecutionContext): number {
-        throw new Error("Method not implemented.");
+
+        const { pc, memory } = ctx
+        if (pc < 0 || pc >= memory.addresses) {
+            throw new Error(`PC (${pc}) is out of bounds for memory of size ${memory.addresses} `)
+        }
+
+        const instruction = program.instructions[pc];
+        if (!instruction) throw new Error(`No instruction found at PC (${pc})`)
+
+        ctx.pc++;
+
+        return instruction;
     }
 
-    decode(word: number, ctx: ExecutionContext): Instruction {
-        throw new Error("Method not implemented.");
+    decode(instruction: number, ctx: ExecutionContext): Instruction {
+        const opcode = extractBits(instruction, 26, 6)
+        const funct = extractBits(instruction, 0, 6)
+        const shamt = extractBits(instruction, 6, 5)
+
+        // We go through all the instructions and find the one that matches the pattern
+        const definition = INSTRUCTION_DEFINITIONS.find(def => {
+            const { opcode: defOp, funct: defFunct, shamt: defShamt } = def.pattern
+            if (defOp !== opcode) return false
+            if (defFunct !== undefined && defFunct !== funct) return false
+            if (defShamt !== undefined && defShamt !== shamt) return false
+
+            return true;
+        })
+
+        if (!definition) throw new Error(`Unknown instruction: opcode ${opcode}, funct ${funct}, shamt ${shamt}`)
+
+        // Decode the instruction based on the format (R-type, I-type, J-type)
+        const fields = decodeByFormat(instruction, definition.format);
+
+        // Map the fields to the generic instruction format
+        return {
+            op: definition.semantic,
+            ...definition.format.mapFields(fields)
+        };
     }
 
     execute(decoded: Instruction, ctx: ExecutionContext): ExecuteOutput {

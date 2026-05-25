@@ -9,6 +9,8 @@ export function extractBits(
     offset: number,
     size: number
 ): number {
+    if (size === 32) return word >>> 0;
+
     return (word >>> offset) & ((1 << size) - 1);
 }
 
