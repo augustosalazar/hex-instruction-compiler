@@ -7,3 +7,8 @@ export interface MemoryOutput {
     valueToWrite: number;
     targetRegister?: number;
 }
+
+export interface MemoryOperationExecuteOutput extends ExecuteOutput {
+    storeValue?: number;
+    isLoad?: boolean;
+}
