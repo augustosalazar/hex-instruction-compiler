@@ -1,11 +1,11 @@
-// a Program is an array of Instructions. 
-// every Compiler is supposed to build its own Program using an input string (space separated hex words)
-export default interface Program {
-    instructions: Instruction[];
+// a Program is an array of raw 32-bit hex words (numbers). 
+// The parser converts the input string (space separated hex words) into this array.
+export interface Program {
+    instructions: number[]; 
 }
 
-// the idea is that any given Compiler sorts out these fields as it reads the input string.
-// this makes sense because every Compiler architecture reads the programs differently.
+// The output of the Decode stage. 
+// Every architecture will map its bits into these generic fields for the Execute stage.
 export interface Instruction {
     type: string;
     op: string; // ALU operation
