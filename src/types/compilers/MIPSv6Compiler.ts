@@ -10,7 +10,8 @@ import type {
     ExecuteOutput,
     MemoryOutput,
     Instruction,
-    ExecutionContext
+    ExecutionContext,
+    MemoryOperationExecuteOutput,
 } from "../abstracts";
 
 export default class MIPSv6Compiler implements Compiler {
@@ -28,14 +29,41 @@ export default class MIPSv6Compiler implements Compiler {
     }
 
     memoryAccess(execResult: ExecuteOutput, ctx: ExecutionContext): MemoryOutput {
-        throw new Error("Method not implemented.");
+        const exec = execResult as MemoryOperationExecuteOutput;
+
+        if (exec.storeValue !== undefined) {
+            ctx.memory.write(exec.aluResult, exec.storeValue);
+            return { valueToWrite: 0 };
+        }
+
+        if (exec.isLoad) {
+            const dato = ctx.memory.read(exec.aluResult);
+            const result: MemoryOutput = { valueToWrite: dato };
+            if (exec.targetRegister !== undefined) {
+                result.targetRegister = exec.targetRegister;
+            }
+            return result;
+        }
+
+        const result: MemoryOutput = { valueToWrite: exec.aluResult };
+        if (exec.targetRegister !== undefined) {
+            result.targetRegister = exec.targetRegister;
+        }
+        return result;
     }
 
     writeback(memResult: MemoryOutput, ctx: ExecutionContext): void {
-        throw new Error("Method not implemented.");
+        if (memResult.targetRegister !== undefined) {
+            ctx.registers.write(memResult.targetRegister, memResult.valueToWrite);
+        }
     }
 
     instructionCycle(program: Program, ctx: ExecutionContext): InstructionReturn {
-        throw new Error("Method not implemented.");
+        const word = this.fetch(program, ctx);
+        const decoded = this.decode(word, ctx);
+        const execResult = this.execute(decoded, ctx);
+        const memResult = this.memoryAccess(execResult, ctx);
+        this.writeback(memResult, ctx);
+        return { status: "OK" };
     }
 }
