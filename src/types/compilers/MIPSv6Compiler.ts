@@ -26,7 +26,7 @@ export default class MIPSv6Compiler implements Compiler {
         }
 
         const instruction = program.instructions[pc];
-        if (!instruction) throw new Error(`No instruction found at PC (${pc})`)
+        if (instruction === undefined) throw new Error(`No instruction found at PC (${pc})`)
 
         ctx.pc++;
 
