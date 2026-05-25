@@ -1,5 +1,5 @@
 import { InstructionReturn } from "./InstructionReturn";
-import { default as RegisterUnit } from "./RegisterUnit";
+import RegisterUnit from "../../core/hardware/RegisterUnit";
 
 //the return type for every main 'compile' function. (/core folder)
 

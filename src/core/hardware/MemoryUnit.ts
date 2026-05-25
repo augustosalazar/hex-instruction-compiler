@@ -1,4 +1,4 @@
-import { Word } from "./word.type";
+import { Word } from "../../types/abstracts/word.type";
 
 //very similar to RegisterUnit
 export default class MemoryUnit {

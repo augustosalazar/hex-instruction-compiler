@@ -1,4 +1,4 @@
-import { RegisterDefinition } from "../isa/registers-definition.interface";
+import { RegisterDefinition } from "../../types/isa/registers-definition.interface";
 
 // register unit simulator type - instanced in main 'compile' function and passed to a Compiler when running
 export default class RegisterUnit {

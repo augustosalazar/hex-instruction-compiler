@@ -1,5 +1,5 @@
-import MemoryUnit from "./MemoryUnit";
-import RegisterUnit from "./RegisterUnit";
+import MemoryUnit from "../../core/hardware/MemoryUnit";
+import RegisterUnit from "../../core/hardware/RegisterUnit";
 
 export interface ExecutionContext {
     pc: number;

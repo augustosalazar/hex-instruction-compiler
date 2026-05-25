@@ -1,12 +1,12 @@
 //    and defines the available operations from the architecture to be implemented.
 //  - in other words, every compiler knows how to read in its own terms.
 
-import { extractBits } from "../../helpers/bits.helper";
-import { decodeByFormat } from "../../helpers/instruction.helper";
-import { INSTRUCTION_DEFINITIONS } from "../../isa/mipsv6";
-import { semantics } from "../../isa/mipsv6/semantics";
+import { extractBits } from "../helpers/bits.helper";
+import { decodeByFormat } from "../helpers/instruction.helper";
+import { INSTRUCTION_DEFINITIONS } from "../isa/mipsv6";
+import { semantics } from "../isa/mipsv6/semantics";
 import type {
-    Compiler,
+    Processor,
     InstructionReturn,
     Program,
     ExecuteOutput,
@@ -14,9 +14,9 @@ import type {
     Instruction,
     ExecutionContext,
     MemoryOperationExecuteOutput,
-} from "../abstracts";
+} from "../types/abstracts";
 
-export default class MIPSv6Compiler implements Compiler {
+export default class MIPSv6Processor implements Processor {
 
     fetch(program: Program, ctx: ExecutionContext): number {
 
@@ -98,14 +98,5 @@ export default class MIPSv6Compiler implements Compiler {
         if (memResult.targetRegister !== undefined && memResult.targetRegister !== 0) {
             ctx.registers.write(memResult.targetRegister, memResult.valueToWrite);
         }
-    }
-
-    instructionCycle(program: Program, ctx: ExecutionContext): InstructionReturn {
-        const word = this.fetch(program, ctx);
-        const decoded = this.decode(word, ctx);
-        const execResult = this.execute(decoded, ctx);
-        const memResult = this.memoryAccess(execResult, ctx);
-        this.writeback(memResult, ctx);
-        return { status: "OK" };
     }
 }

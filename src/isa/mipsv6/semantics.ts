@@ -1,5 +1,5 @@
 import type { ExecutionContext, Instruction, MemoryOperationExecuteOutput } from "../../types/abstracts";
-import alu from "../../core/primitives/alu";
+import alu from "../../core/hardware/alu";
 
 export const semantics: Record<string, (decoded: Instruction, ctx: ExecutionContext) => MemoryOperationExecuteOutput> = {
     NOP(decoded, ctx) {

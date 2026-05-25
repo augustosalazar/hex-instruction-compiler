@@ -1,6 +1,8 @@
 export interface InstructionFormat {
     fields: {
         opcode: { offset: number, size: number };
+
+        // MIPSv6-specific
         rs?: { offset: number, size: number };
         rt?: { offset: number, size: number };
         rd?: { offset: number, size: number };

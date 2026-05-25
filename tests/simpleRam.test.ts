@@ -1,19 +1,21 @@
-import { parseHexProgram } from "../src/helpers/parser.helper";
-import MIPSv6Compiler from "../src/types/compilers/MIPSv6Compiler";
-import { singleCycleCompile } from "../src/core/singleCycleCompile";
-import RegisterUnit from "../src/types/abstracts/RegisterUnit";
-import MemoryUnit from "../src/types/abstracts/MemoryUnit";
-import { ExecutionContext } from "../src/types/abstracts";
-import { registers } from "../src/isa/mipsv6/registers";
+import {
+    singleCycleRun,
+    MIPSv6Processor,
+    RegisterUnit,
+    MemoryUnit,
+    parseHexProgram,
+    ExecutionContext,
+    mipsv6Registers as registers
+} from "../src/index";
 
-describe("MIPSv6 Compiler Execution", () => {
+describe("MIPSv6 Processor Execution", () => {
     it("should correctly execute the provided hex program", () => {
         // 1. Arrange: The program provided by the user (space-separated hex words)
         const hexProgram = "25490001 01294820 00000000 25290001 2408000F 240A000F 01295820 016B6020 018C6820";
 
         const program = parseHexProgram(hexProgram);
         console.log(program.instructions);
-        const compiler = new MIPSv6Compiler();
+        const processor = new MIPSv6Processor();
 
         // MIPS has 32 registers
         const regUnit = new RegisterUnit(new Array(32));
@@ -26,7 +28,7 @@ describe("MIPSv6 Compiler Execution", () => {
         };
 
         // 2. Act: Run the simulation
-        singleCycleCompile(compiler, program, ctx);
+        singleCycleRun(processor, program, ctx);
 
         // 3. Assert: Check if the registers match expected values
         expect(regUnit.read(registers.t0)).toBe(15);
