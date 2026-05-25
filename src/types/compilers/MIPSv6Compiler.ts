@@ -4,6 +4,7 @@
 import { extractBits } from "../../helpers/bits.helper";
 import { decodeByFormat } from "../../helpers/instruction.helper";
 import { INSTRUCTION_DEFINITIONS } from "../../isa/mipsv6";
+import { semantics } from "../../isa/mipsv6/semantics";
 import type {
     Compiler,
     InstructionReturn,
@@ -60,7 +61,13 @@ export default class MIPSv6Compiler implements Compiler {
     }
 
     execute(decoded: Instruction, ctx: ExecutionContext): ExecuteOutput {
-        throw new Error("Method not implemented.");
+        const semanticFn = semantics[decoded.op];
+
+        if (!semanticFn) {
+            throw new Error(`Unimplemented execute semantic: ${decoded.op}`);
+        }
+
+        return semanticFn(decoded, ctx);
     }
 
     memoryAccess(execResult: ExecuteOutput, ctx: ExecutionContext): MemoryOutput {
@@ -88,7 +95,7 @@ export default class MIPSv6Compiler implements Compiler {
     }
 
     writeback(memResult: MemoryOutput, ctx: ExecutionContext): void {
-        if (memResult.targetRegister !== undefined) {
+        if (memResult.targetRegister !== undefined && memResult.targetRegister !== 0) {
             ctx.registers.write(memResult.targetRegister, memResult.valueToWrite);
         }
     }
