@@ -326,28 +326,11 @@ export const J: InstructionDefinition = {
         opcode: 2,
     },
 };
-
-export const JAL: InstructionDefinition = {
-    semantic: "JAL",
-    format: J_TYPE,
-    pattern: {
-        opcode: 3,
-    },
-};
-
 export const BC: InstructionDefinition = {
     semantic: "BC",
     format: J_TYPE,
     pattern: {
         opcode: 50,
-    },
-};
-
-export const BALC: InstructionDefinition = {
-    semantic: "BALC",
-    format: J_TYPE,
-    pattern: {
-        opcode: 58,
     },
 };
 
@@ -388,7 +371,5 @@ export const INSTRUCTION_DEFINITIONS: InstructionDefinition[] = [
     BLEZC,
     BGTZC,
     J,
-    JAL,
-    BC,
-    BALC,
+    BC
 ];

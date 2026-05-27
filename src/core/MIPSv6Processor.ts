@@ -28,7 +28,19 @@ export default class MIPSv6Processor implements Processor {
         const instruction = program.instructions[pc];
         if (instruction === undefined) throw new Error(`No instruction found at PC (${pc})`)
 
-        ctx.pc++;
+        //named 'plusFour' for convention. programatically only add 1
+        const pcPlusFour = ctx.pc + 1;
+
+        //check ctx to see if there is a delay pending.
+        //if there is a delay pending, choose the targetAddress over pcPlusFour.
+        //the delaySlot instruction is always executed, but only sometimes does PC jump to targetAddress afterwards
+        if (ctx.delayPending && ctx.jumpAddress) {
+            ctx.pc = ctx.jumpAddress;
+            ctx.delayPending = false;
+            ctx.jumpAddress = 0;
+        } else {
+            ctx.pc = pcPlusFour;
+        }
 
         return instruction;
     }
@@ -73,6 +85,10 @@ export default class MIPSv6Processor implements Processor {
     memoryAccess(execResult: ExecuteOutput, ctx: ExecutionContext): MemoryOutput {
         const exec = execResult as MemoryOperationExecuteOutput;
 
+        if (exec.hasJump) {
+            return { valueToWrite: exec.aluResult, hasJump: exec.hasJump, hasDelay: exec.hasDelay };
+        }
+
         if (exec.storeValue !== undefined) {
             ctx.memory.write(exec.aluResult, exec.storeValue);
             return { valueToWrite: 0 };
@@ -97,6 +113,18 @@ export default class MIPSv6Processor implements Processor {
     writeback(memResult: MemoryOutput, ctx: ExecutionContext): void {
         if (memResult.targetRegister !== undefined && memResult.targetRegister !== 0) {
             ctx.registers.write(memResult.targetRegister, memResult.valueToWrite);
+            return
+        }
+
+        if (memResult.hasJump) {
+            if (memResult.hasDelay) {
+                //if jump with delay => store data in context so that fetch() step retrieves it
+                ctx.delayPending = true;
+                ctx.jumpAddress = memResult.valueToWrite;
+            } else {
+                //if no delay => change pc inmediately
+                ctx.pc = memResult.valueToWrite;
+            }
         }
     }
 }
