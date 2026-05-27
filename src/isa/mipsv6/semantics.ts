@@ -239,7 +239,7 @@ export const semantics: Record<string, (decoded: Instruction, ctx: ExecutionCont
 
         return {
             aluResult: alu.add(ctx.pc, imm),
-            hasJump: alu.sub(0, val2) <= 0,//???
+            hasJump: alu.sub(0, val2) >= 0,
             hasDelay: false
         };
     },
@@ -249,7 +249,7 @@ export const semantics: Record<string, (decoded: Instruction, ctx: ExecutionCont
 
         return {
             aluResult: alu.add(ctx.pc, imm),
-            hasJump: alu.sub(0, val2) > 0,//???
+            hasJump: alu.sub(0, val2) < 0,
             hasDelay: false
         };
     },
@@ -259,7 +259,7 @@ export const semantics: Record<string, (decoded: Instruction, ctx: ExecutionCont
 
         return {
             aluResult: alu.add(ctx.pc, imm),
-            hasJump: alu.sub(0, val2) === 0,//???
+            hasJump: alu.sub(0, val2) === 0,
             hasDelay: false
         };
     },
@@ -269,11 +269,19 @@ export const semantics: Record<string, (decoded: Instruction, ctx: ExecutionCont
 
         return {
             aluResult: alu.add(ctx.pc, imm),
-            hasJump: alu.sub(0, val2) !== 0,//???
+            hasJump: alu.sub(0, val2) !== 0,
             hasDelay: false
         };
     },
-    BLEZC(decoded, ctx) { // idk
+    BLEZC(decoded, ctx) { // rt <= 0 (signed)
+        const val2 = ctx.registers.read(decoded.target);
+        const imm = decoded.operand2;
+
+        return {
+            aluResult: alu.add(ctx.pc, imm),
+            hasJump: alu.sub(0, val2) >= 0,
+            hasDelay: false
+        }
     },
     BGTZC(decoded, ctx) { // signed compare rt > 0
         const val2 = ctx.registers.read(decoded.target);
@@ -281,11 +289,19 @@ export const semantics: Record<string, (decoded: Instruction, ctx: ExecutionCont
 
         return {
             aluResult: alu.add(ctx.pc, imm),
-            hasJump: alu.sub(0, val2) <= 0,//???
+            hasJump: alu.sub(0, val2) < 0,
             hasDelay: false
         };
     },
     BLTZ(decoded, ctx) { // rs < 0 (sign bit 1?) *delay
+        const val1 = ctx.registers.read(decoded.operand1);
+        const imm = decoded.operand2;
+
+        return {
+            aluResult: alu.add(ctx.pc, imm),
+            hasJump: alu.sub(0, val1) > 0,
+            hasDelay: true
+        }
     },
     BNE(decoded, ctx) { // rs != rt *delay
         const val1 = ctx.registers.read(decoded.operand1);
@@ -294,7 +310,27 @@ export const semantics: Record<string, (decoded: Instruction, ctx: ExecutionCont
         return {
             aluResult: alu.add(ctx.pc, imm),
             hasJump: alu.sub(val1, val2) !== 0
+        }
+    },
+    J(decoded, ctx) {
+        const offset = decoded.operand1;
+        const pcMasked = ctx.pc & 0xF0000000; // Keep upper 4 bits of PC
+        const targetAddr = (offset << 2) | pcMasked; // Shift left by 2 and combine with PC upper bits
+        return {
+            aluResult: targetAddr,
+            hasJump: true,
+            hasDelay: true
         };
     },
+    BC(decoded, ctx) { // Unconditional Branch, no delay slot
+        const offset = decoded.operand2;
+        const extension = (offset << 2); // Sign-extend the offset
+        return {
+            aluResult: alu.add(ctx.pc, extension),
+            hasJump: true,
+            hasDelay: false
+        };
+    }
 
+    
 };
