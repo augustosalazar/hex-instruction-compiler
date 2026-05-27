@@ -6,9 +6,12 @@ export interface ExecuteOutput {
 export interface MemoryOutput {
     valueToWrite: number;
     targetRegister?: number;
+    hasJump?: boolean;
 }
 
 export interface MemoryOperationExecuteOutput extends ExecuteOutput {
     storeValue?: number;
     isLoad?: boolean;
+    hasJump?: boolean;
+    hasDelay?: boolean;
 }

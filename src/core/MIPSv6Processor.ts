@@ -73,6 +73,10 @@ export default class MIPSv6Processor implements Processor {
     memoryAccess(execResult: ExecuteOutput, ctx: ExecutionContext): MemoryOutput {
         const exec = execResult as MemoryOperationExecuteOutput;
 
+        if (exec.hasJump) {
+            return { valueToWrite: exec.aluResult, hasJump: exec.hasJump };
+        }
+
         if (exec.storeValue !== undefined) {
             ctx.memory.write(exec.aluResult, exec.storeValue);
             return { valueToWrite: 0 };
@@ -97,6 +101,12 @@ export default class MIPSv6Processor implements Processor {
     writeback(memResult: MemoryOutput, ctx: ExecutionContext): void {
         if (memResult.targetRegister !== undefined && memResult.targetRegister !== 0) {
             ctx.registers.write(memResult.targetRegister, memResult.valueToWrite);
+            return
+        }
+
+        //TODO: delay slot
+        if (memResult.hasJump) {
+            ctx.pc = memResult.valueToWrite;
         }
     }
 }

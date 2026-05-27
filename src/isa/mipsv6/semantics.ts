@@ -1,4 +1,4 @@
-import type { ExecutionContext, Instruction, MemoryOperationExecuteOutput } from "../../types/abstracts";
+import type { ExecutionContext, Instruction, MemoryOperationExecuteOutput, PipelineContext } from "../../types/abstracts";
 import alu from "../../core/hardware/alu";
 
 export const semantics: Record<string, (decoded: Instruction, ctx: ExecutionContext) => MemoryOperationExecuteOutput> = {
@@ -222,4 +222,79 @@ export const semantics: Record<string, (decoded: Instruction, ctx: ExecutionCont
             targetRegister: decoded.target
         };
     },
+    BEQ(decoded, ctx) { // rs == rt ? *delay
+
+        const val1 = ctx.registers.read(decoded.operand1);
+        const imm = decoded.operand2;
+        const val2 = ctx.registers.read(decoded.target);
+        return {
+            aluResult: alu.add(ctx.pc, imm),
+            hasJump: alu.sub(val1, val2) === 0,
+            hasDelay: true
+        };
+    },
+    BLEZALC(decoded, ctx) { // rt <= 0 ?
+        const val2 = ctx.registers.read(decoded.target);
+        const imm = decoded.operand2;
+
+        return {
+            aluResult: alu.add(ctx.pc, imm),
+            hasJump: alu.sub(0, val2) <= 0,//???
+            hasDelay: false
+        };
+    },
+    BGTZALC(decoded, ctx) { // rt > 0 ?
+        const val2 = ctx.registers.read(decoded.target);
+        const imm = decoded.operand2;
+
+        return {
+            aluResult: alu.add(ctx.pc, imm),
+            hasJump: alu.sub(0, val2) > 0,//???
+            hasDelay: false
+        };
+    },
+    BEQZALC(decoded, ctx) { // rt == 0 ?
+        const val2 = ctx.registers.read(decoded.target);
+        const imm = decoded.operand2;
+
+        return {
+            aluResult: alu.add(ctx.pc, imm),
+            hasJump: alu.sub(0, val2) === 0,//???
+            hasDelay: false
+        };
+    },
+    BNEZALC(decoded, ctx) { // rt != 0 ?
+        const val2 = ctx.registers.read(decoded.target);
+        const imm = decoded.operand2;
+
+        return {
+            aluResult: alu.add(ctx.pc, imm),
+            hasJump: alu.sub(0, val2) !== 0,//???
+            hasDelay: false
+        };
+    },
+    BLEZC(decoded, ctx) { // idk
+    },
+    BGTZC(decoded, ctx) { // signed compare rt > 0
+        const val2 = ctx.registers.read(decoded.target);
+        const imm = decoded.operand2;
+
+        return {
+            aluResult: alu.add(ctx.pc, imm),
+            hasJump: alu.sub(0, val2) <= 0,//???
+            hasDelay: false
+        };
+    },
+    BLTZ(decoded, ctx) { // rs < 0 (sign bit 1?) *delay
+    },
+    BNE(decoded, ctx) { // rs != rt *delay
+        const val1 = ctx.registers.read(decoded.operand1);
+        const imm = decoded.operand2;
+        const val2 = ctx.registers.read(decoded.target);
+        return {
+            aluResult: alu.add(ctx.pc, imm),
+            hasJump: alu.sub(val1, val2) !== 0
+        };
+    },
+
 };
