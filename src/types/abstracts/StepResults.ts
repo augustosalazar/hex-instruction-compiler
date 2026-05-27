@@ -7,6 +7,7 @@ export interface MemoryOutput {
     valueToWrite: number;
     targetRegister?: number;
     hasJump?: boolean;
+    hasDelay?: boolean | undefined;
 }
 
 export interface MemoryOperationExecuteOutput extends ExecuteOutput {

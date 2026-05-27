@@ -1,4 +1,5 @@
 import type { Processor, CompileOutput, ExecutionContext, Program } from "../types/abstracts";
+import { singleCycle } from "./singleCycle";
 
 // correr el Programa de manera secuencial
 export function singleCycleRun(
@@ -10,12 +11,10 @@ export function singleCycleRun(
     const start = performance.now();
 
     while (ctx.pc < program.instructions.length) {
-        const word = processor.fetch(program, ctx);
-        const decoded = processor.decode(word, ctx);
-        const execResult = processor.execute(decoded, ctx);
-        const memResult = processor.memoryAccess(execResult, ctx);
-        processor.writeback(memResult, ctx);
-        
+
+        //A single cycle just performs every Step in succession.
+        singleCycle(processor, program, ctx);
+
         cycles++;
     }
 

@@ -7,6 +7,10 @@ export interface ExecutionContext {
     memory: MemoryUnit;
 
     registers: RegisterUnit;
+
+    delayPending?: boolean;
+
+    jumpAddress?: number;
 }
 
 export interface PipelineContext extends ExecutionContext {

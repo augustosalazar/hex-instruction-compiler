@@ -323,14 +323,14 @@ export const semantics: Record<string, (decoded: Instruction, ctx: ExecutionCont
         };
     },
     BC(decoded, ctx) { // Unconditional Branch, no delay slot
-        const offset = decoded.operand2;
+        const offset = decoded.operand1;
         const extension = (offset << 2); // Sign-extend the offset
         return {
-            aluResult: alu.add(ctx.pc, extension),
+            aluResult: alu.add(ctx.pc, offset),
             hasJump: true,
             hasDelay: false
         };
     }
 
-    
+
 };
