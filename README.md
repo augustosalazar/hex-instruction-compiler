@@ -114,16 +114,59 @@ This result means all 31 RegisterUnit unit tests passed successfully, so the tes
 
 ## Test Evidence Screenshot
 
-Insert the screenshot of the RegisterUnit terminal test execution here, right after this paragraph.
+![RegisterUnit unit test results](docs/screenshots/registerunit-test-results.png)
 
-Suggested location for the image file:
+# MEMORYUNIT UNIT TESTS
+
+A unit test suite was added for the memory simulator in `tests/memoryUnit.test.ts`. The goal of this test file is to validate the `MemoryUnit` class independently from instruction decoding, register behavior, ALU execution, or full processor execution.
+
+The suite is organized under the `MemoryUnit` describe block and covers:
+
+1. Initialization of memory with 32-bit words and 1024 addresses.
+2. Validation that all addresses start initialized to `0`.
+3. Reading valid addresses before and after writes.
+4. Writing unsigned 32-bit values to valid addresses.
+5. Address bounds checking for negative addresses and addresses greater than or equal to the configured size.
+6. Independence between memory addresses.
+7. Boundary values such as `0xffffffff`, `0x80000000`, negative numbers, zero, first address, and last address.
+8. Different memory sizes, including 1 address, 10 addresses, and 10000 addresses.
+9. Public configuration properties: `wordSize` and `addresses`.
+10. Sequential write/read operations and overwrites.
+
+## What This Test Means
+
+These tests confirm that `MemoryUnit` behaves like the bounded memory component expected by the MIPS v6 processor simulator:
+
+- A new memory unit keeps the configured `wordSize` and `addresses`.
+- Every valid memory address starts with value `0`.
+- Valid reads and writes work inside the range `[0, addresses - 1]`.
+- Invalid reads and writes throw `Error("Address out of bounds")`.
+- Memory values are stored as unsigned 32-bit words because the implementation uses `Uint32Array`.
+- Negative values and values larger than 32 bits are converted to their 32-bit unsigned representation.
+- Writing one address does not affect neighboring or unrelated addresses.
+- Repeated writes keep the latest value.
+
+The constructor validation is also tested: `new MemoryUnit(32, 0)` and `new MemoryUnit(32, -5)` must throw `Error("Memory must have at least one address")`.
+
+## Test Result
+
+The MemoryUnit test suite was executed with:
+
+```bash
+npm test -- tests/memoryUnit.test.ts --runInBand
+```
+
+Expected result:
 
 ```text
-docs/screenshots/registerunit-test-results.png
+Test Suites: 1 passed, 1 total
+Tests:       44 passed, 44 total
+Snapshots:   0 total
 ```
 
-Markdown line to use after saving the screenshot:
+This result means all 44 MemoryUnit unit tests passed successfully, so the tested memory initialization, reading, writing, bounds checking, address independence, and unsigned 32-bit storage behavior match the expected behavior.
 
-```md
-![RegisterUnit unit test results](docs/screenshots/registerunit-test-results.png)
-```
+## Test Evidence Screenshot
+
+![MemoryUnit unit test results](docs/screenshots/memoryunit-test-results.png)
+
