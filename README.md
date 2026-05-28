@@ -18,6 +18,189 @@ The output of the library includes the final state of the RegisterUnit, the numb
 
 This library is written in TypeScript. Its unit tests are to be done with jest and ts-jest. It is to be bundled with tsup. 
 
+# DEMO EXECUTION
+
+An executable demo was added in `src/demo.ts`. This file is not a Jest test; it is a usage example that runs a real MIPS v6 hexadecimal program through the library.
+
+The demo shows the complete execution flow:
+
+1. Import the public API from `src/index.ts`.
+2. Define a MIPS v6 program as a space-separated hexadecimal string.
+3. Parse the program with `parseHexProgram`.
+4. Create a `MIPSv6Processor`.
+5. Create an execution context with `RegisterUnit`, `MemoryUnit`, and `pc = 0`.
+6. Execute the program with `singleCycleRun`.
+7. Print the parsed instructions, cycle count, execution time, and final register values.
+
+## How To Run The Demo
+
+From the project root, run:
+
+```bash
+npx tsx src/demo.ts
+```
+
+If you want to make this command easier to reuse, add this script to `package.json`:
+
+```json
+"demo": "tsx src/demo.ts"
+```
+
+Then run:
+
+```bash
+npm run demo
+```
+
+## What This Demo Means
+
+The demo confirms that the main library pieces work together in a realistic execution flow:
+
+- `parseHexProgram` converts the hex string into a `Program`.
+- `MIPSv6Processor` executes the decoded instructions.
+- `RegisterUnit` stores the final register values.
+- `MemoryUnit` provides memory for the execution context.
+- `singleCycleRun` runs the full program and reports cycles plus execution time.
+
+The expected output includes 9 executed cycles and these final register values:
+
+```text
+$t0 ($8) = 15
+$t1 ($9) = 3
+$t2 ($10) = 15
+$t3 ($11) = 6
+$t4 ($12) = 12
+$t5 ($13) = 24
+```
+
+These values mean the hexadecimal program was parsed and executed correctly, producing the same final register state used by the classroom `simpleRAMSolved` example.
+
+## Demo Evidence Screenshot
+
+![Demo execution results](docs/screenshots/demo-execution-results.png)
+
+# SIMPLERAM INTEGRATION TEST
+
+An integration test exists in `tests/simpleRam.test.ts`. This test validates that the processor can parse and execute the classroom `simpleRAMSolved` hexadecimal program from start to finish.
+
+The test uses the public project API:
+
+1. `parseHexProgram` converts the hexadecimal string into a `Program`.
+2. `MIPSv6Processor` creates the processor instance.
+3. `RegisterUnit` creates the 32-register MIPS register file.
+4. `MemoryUnit` creates memory with 32-bit words and 1024 addresses.
+5. `singleCycleRun` executes the complete program.
+6. Jest assertions verify the final register values.
+
+## What This Test Means
+
+This test confirms that the main pieces of the simulator work together for a real MIPS v6 program:
+
+- The parser converts the hex instructions correctly.
+- The processor executes all instructions through the single-cycle runner.
+- Register writes happen in the expected destinations.
+- The final state matches the known classroom result.
+
+The expected final register values are:
+
+```text
+$t0 = 15
+$t1 = 3
+$t2 = 15
+$t3 = 6
+$t4 = 12
+$t5 = 24
+```
+
+These values mean the program executed correctly and produced the expected arithmetic/register state.
+
+## Test Result
+
+The simple RAM integration test was executed with:
+
+```bash
+npm test -- tests/simpleRam.test.ts --runInBand
+```
+
+Verified result:
+
+```text
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+```
+
+This result means the classroom `simpleRAMSolved` program passed successfully as a full parse-and-execute scenario.
+
+## Test Evidence Screenshot
+
+![Simple RAM integration test results](docs/screenshots/simple-ram-test-results.png)
+
+# BRANCHING INTEGRATION TEST
+
+An integration test exists in `tests/branching.test.ts`. This test validates the classroom `simpleRamBranchJump.hex` program, which focuses on branch and jump behavior across individual cycles and full-program execution.
+
+The test checks the control-flow behavior of:
+
+1. `BEQ` taken with a delay slot.
+2. `BNE` not taken with its delay-slot instruction still executed.
+3. `BGTZC` not taken without a delay slot.
+4. `BGTZC` taken without a delay slot.
+5. `BLTZ` not taken with delay-slot behavior.
+6. `BC` unconditional compact branches that skip instructions.
+7. Final register state after running the complete branch/jump program.
+
+## What This Test Means
+
+This test confirms that the simulator handles MIPS control flow correctly:
+
+- Sequential setup instructions advance `pc` normally.
+- Taken branches store the expected jump target.
+- Delay-slot instructions execute when required.
+- Compact branches skip delay-slot behavior.
+- Skipped instructions do not modify registers.
+- A full run ends with the expected final register trace.
+
+The final expected register values are:
+
+```text
+$t0 = 0x00000005
+$t1 = 0x00000005
+$t2 = 0x00000004
+$t3 = 0x00000001
+$t4 = 0x00000002
+$t5 = 0xffffffff
+$t6 = 0x00000009
+$t7 = 0x00005555
+$t8 = 0x00003333
+$t9 = 0x00000000
+```
+
+The `$t2` value is especially important: it works as a branch accumulator and proves that only the expected delay-slot or fall-through increments executed.
+
+## Test Result
+
+The branching integration test was executed with:
+
+```bash
+npm test -- tests/branching.test.ts --runInBand
+```
+
+Verified result:
+
+```text
+Test Suites: 1 passed, 1 total
+Tests:       11 passed, 11 total
+Snapshots:   0 total
+```
+
+This result means all 11 branch/jump tests passed successfully, so the tested PC flow, delay-slot behavior, compact branches, skipped instructions, and final register state match the expected behavior.
+
+## Test Evidence Screenshot
+
+![Branching integration test results](docs/screenshots/branching-test-results.png)
+
+
 # ALU UNIT TESTS
 
 A unit test suite was added for the ALU in `tests/alu.test.ts`. The goal of this test file is to validate the behavior of the arithmetic logic unit independently from the rest of the processor, so each ALU method is checked directly with controlled inputs and expected outputs.
