@@ -269,63 +269,6 @@ Guarda la captura de esta prueba en `docs/screenshots/decoder-test-results.png` 
 
 ![Decoder unit test results](docs/screenshots/decoder-test-results.png)
 
-# SINGLE CYCLE EXECUTION TESTS
-
-A test suite was added for single-instruction pipeline execution in `tests/singleCycle.test.ts`. The goal of this file is to validate `singleCycle()` as the orchestrator of the five MIPS pipeline stages for one instruction at a time: fetch, decode, execute, memory access, and write back.
-
-The suite is organized under the `Single Cycle Execution` describe block and covers:
-
-1. End-to-end execution of one instruction with `ADD`, `ADDIU`, and `NOP`.
-2. Pipeline orchestration order by checking calls to `fetch()`, `decode()`, `execute()`, `memoryAccess()`, and `writeback()`.
-3. Program counter progression across sequential cycles.
-4. Fetch behavior for the current PC and the next instruction in consecutive cycles.
-5. Decode behavior for R-type, I-type, and J-type instructions.
-6. Execute behavior for arithmetic and logical instructions.
-7. Memory access behavior for `LW` and `SW`, including the larger-memory helper needed for addresses such as `0x1000`.
-8. Write-back behavior, including destination register updates and protection of `$zero`.
-9. Branch and jump behavior for `BEQ`, `J`, and `BC`, including delay-slot handling.
-10. Classroom step-by-step execution using the `simpleRAMSolved` program.
-11. Error handling for invalid PC values and unknown instructions.
-12. State consistency, in-place context mutation, program immutability, and a lightweight performance sanity check.
-
-## What This Test Means
-
-These tests confirm that `singleCycle()` correctly wires together the processor stages for one machine instruction:
-
-- `fetch()` reads the instruction at the current `pc` and updates the sequential next PC before decode.
-- `decode()` transforms the raw word into the normalized instruction structure consumed by execution.
-- `execute()` computes arithmetic, logical, branch, jump, or memory-address results.
-- `memoryAccess()` performs loads and stores only when the instruction requires them.
-- `writeback()` updates the target register when appropriate and preserves register `0`.
-
-The tests also document two important implementation details of the current simulator:
-
-- Delayed branches and jumps do not move `pc` to the final target during the same `singleCycle()` call. Instead, they set `delayPending` and `jumpAddress`, and the actual jump is applied by the next `fetch()` while still executing the delay-slot instruction.
-- The default helper `createContext()` uses `MemoryUnit(32, 1024)`, which is enough for low addresses only. Tests that access memory at `0x1000` use a second helper with a larger memory range so the test reflects the real memory contract instead of failing on bounds.
-
-This matters because `singleCycle()` is the smallest full execution unit in the project. If its stage ordering, PC updates, delay-slot handling, or write-back logic are wrong, both instruction-level tests and full-program execution can appear inconsistent even when ALU or semantic functions are correct.
-
-## Test Result
-
-The single-cycle test suite was executed with:
-
-```bash
-npx jest tests/singleCycle.test.ts --runInBand
-```
-
-Verified result:
-
-```text
-Test Suites: 1 passed, 1 total
-Tests:       34 passed, 34 total
-Snapshots:   0 total
-```
-
-This result means the single-cycle execution tests are passing and the current implementation correctly handles the covered pipeline flow, PC progression, memory interaction, delay-slot behavior, classroom checkpoints, and error cases.
-
-## Test Evidence Screenshot
-![Single cycle execution test results](docs/screenshots/single-cycle-test-results.png)
-
 # MIPS INSTRUCTION SEMANTICS UNIT TESTS
 
 A unit and integration test suite was added for the MIPS v6 instruction semantics in `tests/semantics.test.ts`. The goal of this test file is to validate the behavior defined in `src/isa/mipsv6/semantics.ts`: what each decoded instruction does when it reaches the execute stage.
@@ -390,3 +333,119 @@ This result means the new semantics coverage passed and did not break the existi
 ## Test Evidence Screenshot
 
 ![MIPS instruction semantics test results](docs/screenshots/semantics-test-results.png)
+
+# SINGLE CYCLE EXECUTION TESTS
+
+A test suite was added for single-instruction pipeline execution in `tests/singleCycle.test.ts`. The goal of this file is to validate `singleCycle()` as the orchestrator of the five MIPS pipeline stages for one instruction at a time: fetch, decode, execute, memory access, and write back.
+
+The suite is organized under the `Single Cycle Execution` describe block and covers:
+
+1. End-to-end execution of one instruction with `ADD`, `ADDIU`, and `NOP`.
+2. Pipeline orchestration order by checking calls to `fetch()`, `decode()`, `execute()`, `memoryAccess()`, and `writeback()`.
+3. Program counter progression across sequential cycles.
+4. Fetch behavior for the current PC and the next instruction in consecutive cycles.
+5. Decode behavior for R-type, I-type, and J-type instructions.
+6. Execute behavior for arithmetic and logical instructions.
+7. Memory access behavior for `LW` and `SW`, including the larger-memory helper needed for addresses such as `0x1000`.
+8. Write-back behavior, including destination register updates and protection of `$zero`.
+9. Branch and jump behavior for `BEQ`, `J`, and `BC`, including delay-slot handling.
+10. Classroom step-by-step execution using the `simpleRAMSolved` program.
+11. Error handling for invalid PC values and unknown instructions.
+12. State consistency, in-place context mutation, program immutability, and a lightweight performance sanity check.
+
+## What This Test Means
+
+These tests confirm that `singleCycle()` correctly wires together the processor stages for one machine instruction:
+
+- `fetch()` reads the instruction at the current `pc` and updates the sequential next PC before decode.
+- `decode()` transforms the raw word into the normalized instruction structure consumed by execution.
+- `execute()` computes arithmetic, logical, branch, jump, or memory-address results.
+- `memoryAccess()` performs loads and stores only when the instruction requires them.
+- `writeback()` updates the target register when appropriate and preserves register `0`.
+
+The tests also document two important implementation details of the current simulator:
+
+- Delayed branches and jumps do not move `pc` to the final target during the same `singleCycle()` call. Instead, they set `delayPending` and `jumpAddress`, and the actual jump is applied by the next `fetch()` while still executing the delay-slot instruction.
+- The default helper `createContext()` uses `MemoryUnit(32, 1024)`, which is enough for low addresses only. Tests that access memory at `0x1000` use a second helper with a larger memory range so the test reflects the real memory contract instead of failing on bounds.
+
+This matters because `singleCycle()` is the smallest full execution unit in the project. If its stage ordering, PC updates, delay-slot handling, or write-back logic are wrong, both instruction-level tests and full-program execution can appear inconsistent even when ALU or semantic functions are correct.
+
+## Test Result
+
+The single-cycle test suite was executed with:
+
+```bash
+npx jest tests/singleCycle.test.ts --runInBand
+```
+
+Verified result:
+
+```text
+Test Suites: 1 passed, 1 total
+Tests:       34 passed, 34 total
+Snapshots:   0 total
+```
+
+This result means the single-cycle execution tests are passing and the current implementation correctly handles the covered pipeline flow, PC progression, memory interaction, delay-slot behavior, classroom checkpoints, and error cases.
+
+## Test Evidence Screenshot
+![Single cycle execution test results](docs/screenshots/single-cycle-test-results.png)
+
+# SINGLE CYCLE RUN TESTS
+
+A test suite was added for complete program execution in `tests/singleCycleRun.test.ts`. The goal of this file is to validate `singleCycleRun()`, the runner that repeatedly executes single-cycle steps until a full `Program` finishes.
+
+This is different from `tests/singleCycle.test.ts`: `singleCycle.test.ts` checks one instruction at a time, while `singleCycleRun.test.ts` checks complete programs from start to finish.
+
+The suite is organized under the `Single Cycle Run (Complete Program Execution)` describe block and covers:
+
+1. Basic execution of 1, 2, and 5 instruction programs.
+2. Program termination when `pc` reaches the end of the instruction array.
+3. Cycle counting and execution-time reporting.
+4. Returned output structure: `registryState`, `time`, and `cycles`.
+5. Final register state preservation.
+6. Real classroom programs: `simpleRAMSolved`, `simpleRamLwSwSolved`, and `simpleRamBranchJumpResult`.
+7. Single-instruction programs such as `ADDIU`, `ADD`, `NOP`, `LW`, and `SW`.
+8. Branch and jump flow, including skipped instructions and delay-slot behavior.
+9. Arithmetic, memory, and logical operation consistency across full execution.
+10. `$zero` integrity after program execution.
+11. Final `pc` correctness.
+12. Stress tests with long programs, many memory operations, and many jumps.
+13. Non-destructive execution with separate contexts.
+14. Consistency between `singleCycleRun()` and repeated manual calls to `singleCycle()`.
+
+## What This Test Means
+
+These tests confirm that the simulator can execute entire MIPS v6 hex programs, not only isolated instructions:
+
+- `singleCycleRun()` keeps calling the single-cycle pipeline until the program finishes.
+- The final `pc` lands at the expected program boundary.
+- Cycle counts match sequential programs and reflect branch/jump control flow.
+- Register and memory state are updated correctly after complete execution.
+- Branches, jumps, delay slots, loads, stores, arithmetic, and logical instructions compose correctly over multiple cycles.
+- Separate execution contexts do not share mutable register or memory state.
+
+This matters because full-program execution is the behavior a library user actually depends on: parse hex instructions, run the program, then inspect final registers, memory, cycles, and timing.
+
+## Test Result
+
+The single-cycle runner test suite was executed with:
+
+```bash
+npm test -- tests/singleCycleRun.test.ts --runInBand
+```
+
+Verified result:
+
+```text
+Test Suites: 1 passed, 1 total
+Tests:       51 passed, 51 total
+Snapshots:   0 total
+```
+
+This result means all 51 complete-program execution tests passed successfully, so the tested runner behavior, cycle counting, PC progression, final architectural state, branch/jump handling, memory operations, and context isolation match the expected behavior.
+
+## Test Evidence Screenshot
+
+![Single cycle run test results](docs/screenshots/single-cycle-run-test-results.png)
+
