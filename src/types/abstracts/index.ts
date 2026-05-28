@@ -5,3 +5,4 @@ export * from './Processor';
 export * from './CompileOutput';
 export * from './InstructionReturn';
 export * from './StepResults';
+export * from './StageContext';
