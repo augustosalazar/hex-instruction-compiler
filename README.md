@@ -170,3 +170,53 @@ This result means all 44 MemoryUnit unit tests passed successfully, so the teste
 
 ![MemoryUnit unit test results](docs/screenshots/memoryunit-test-results.png)
 
+# PARSER UNIT TESTS
+
+A unit test suite was added for the hexadecimal program parser in `tests/parser.test.ts`. The goal of this test file is to validate `parseHexProgram` independently from instruction execution, registers, memory, and the ALU.
+
+The suite is organized under the `parseHexProgram Parser` describe block and covers:
+
+1. Basic parsing of one or more hexadecimal instructions.
+2. Whitespace handling with spaces, repeated spaces, tabs, line breaks, and leading/trailing spaces.
+3. Hexadecimal formats in lowercase, uppercase, mixed case, with `0x` prefix, and without prefix.
+4. Unsigned 32-bit conversion using `>>> 0`.
+5. Empty input, whitespace-only input, long programs, and leading zeroes.
+6. Real classroom examples such as `simpleRAMSolved`, a LW/SW-style memory program, and the branch/jump program.
+7. Program return shape: an object with an `instructions` array.
+8. Special instruction values such as `00000000` NOP and `FFFFFFFF`.
+
+## What This Test Means
+
+These tests confirm that `parseHexProgram` correctly transforms a textual hex program into the `Program` structure consumed by the simulator:
+
+- Each hex word becomes a number in `instructions`.
+- Instruction order is preserved.
+- Empty words caused by whitespace are ignored.
+- Tabs, new lines, and repeated spaces work as separators.
+- Values are normalized to unsigned 32-bit instruction words.
+- Real class programs are parsed with the expected number of instructions.
+
+This is important because the parser is the first step before execution: if it changes instruction order, loses words, or produces signed/incorrect values, the processor tests can fail even when the CPU components are correct.
+
+## Test Result
+
+The parser test suite was executed with:
+
+```bash
+npm test -- tests/parser.test.ts --runInBand
+```
+
+Expected result:
+
+```text
+Test Suites: 1 passed, 1 total
+Tests:       33 passed, 33 total
+Snapshots:   0 total
+```
+
+This result means all 33 parser unit tests passed successfully, so the tested hex formats, whitespace handling, Program shape, classroom examples, and unsigned 32-bit conversions match the expected behavior.
+
+## Test Evidence Screenshot
+
+![Parser unit test results](docs/screenshots/parser-test-results.png)
+
