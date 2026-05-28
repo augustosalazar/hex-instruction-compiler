@@ -145,7 +145,7 @@ export default class alu {
         const unsignedA = a >>> 0;
         const unsignedB = b >>> 0;
 
-        return unsignedA + unsignedB;
+        return (unsignedA + unsignedB) >>> 0;
     }
 
     static subu(a: number, b: number): number {
@@ -153,7 +153,7 @@ export default class alu {
         const unsignedA = a >>> 0;
         const unsignedB = b >>> 0;
 
-        return unsignedA - unsignedB;
+        return (unsignedA - unsignedB) >>> 0;
     }
 
     static nor(a: number, b: number): number {

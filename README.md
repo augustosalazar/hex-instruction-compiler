@@ -17,3 +17,53 @@ The output of the library includes the final state of the RegisterUnit, the numb
 # DEVELOPMENT DETAILS
 
 This library is written in TypeScript. Its unit tests are to be done with jest and ts-jest. It is to be bundled with tsup. 
+
+# ALU UNIT TESTS
+
+A unit test suite was added for the ALU in `tests/alu.test.ts`. The goal of this test file is to validate the behavior of the arithmetic logic unit independently from the rest of the processor, so each ALU method is checked directly with controlled inputs and expected outputs.
+
+The suite is organized under the `ALU Operations` describe block and covers:
+
+1. Signed arithmetic operations: `add`, `sub`, `mul`, `muh`, `div`, and `mod`.
+2. Unsigned arithmetic operations: `addu`, `subu`, `mulu`, `mulhu`, `divu`, and `modu`.
+3. Logical operations: `and`, `or`, `xor`, and `nor`.
+4. Comparison operations: `slt` and `sltu`.
+
+Each operation includes tests for normal positive values, negative values when applicable, zero values, 32-bit boundary cases, overflow or wraparound behavior, and division-by-zero errors.
+
+## What These Tests Mean
+
+These tests confirm that the ALU behaves like a 32-bit MIPS-style execution unit:
+
+- Signed operations interpret operands as signed 32-bit integers.
+- Unsigned operations interpret operands as values from `0` to `0xffffffff`.
+- Multiplication tests verify both low 32-bit results and high 32-bit results.
+- Division truncates toward zero.
+- Modulo keeps the expected JavaScript/MIPS-style signed remainder behavior.
+- Logical operations work at the bit level.
+- `slt` and `sltu` correctly distinguish signed and unsigned comparisons.
+
+During testing, the unsigned `addu` and `subu` operations exposed missing 32-bit wraparound behavior. Their return values were adjusted in `src/core/hardware/alu.ts` using `>>> 0`, so unsigned results remain inside the 32-bit range.
+
+## Test Result
+
+The ALU test suite was executed with:
+
+```bash
+npm test -- tests/alu.test.ts --runInBand
+```
+
+Expected result:
+
+```text
+Test Suites: 1 passed, 1 total
+Tests:       74 passed, 74 total
+Snapshots:   0 total
+```
+
+This result means all 74 ALU unit tests passed successfully, so the tested operations match the expected 32-bit behavior.
+
+## Test Evidence Screenshot
+
+![ALU unit test results](docs/screenshots/alu-test-results.png)
+
