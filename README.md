@@ -67,3 +67,63 @@ This result means all 74 ALU unit tests passed successfully, so the tested opera
 
 ![ALU unit test results](docs/screenshots/alu-test-results.png)
 
+# REGISTERUNIT UNIT TESTS
+
+A unit test suite was added for the register file simulator in `tests/registerUnit.test.ts`. The goal of this test file is to validate the `RegisterUnit` class independently from instruction decoding, ALU execution, memory, or full processor execution.
+
+The suite is organized under the `RegisterUnit` describe block and covers:
+
+1. Initialization of a standard 32-register MIPS register file.
+2. Reading valid registers before and after writes.
+3. Writing unsigned 32-bit values to registers 1 through 31.
+4. Special behavior of register index 0, the MIPS `$zero` register.
+5. Boundary values such as `0xffffffff`, `0x80000000`, negative numbers, and zero.
+6. Multiple operations, overwrites, and independence between registers.
+7. Current out-of-range behavior for indexes outside the 0-31 range.
+
+## What This Test Means
+
+These tests confirm that `RegisterUnit` behaves like the register bank expected by the MIPS v6 processor simulator:
+
+- A new register unit starts with all valid registers initialized to `0`.
+- Register `0` acts like `$zero`: attempted writes are ignored and reads always return `0`.
+- Values written to normal registers are converted to unsigned 32-bit integers with `>>> 0`.
+- Negative numbers are stored as their 32-bit unsigned representation.
+- Updating one register does not modify unrelated registers.
+- Repeated writes keep the last written value.
+
+The tests also document an implementation detail that may be important later: the current class does not reject indexes outside the MIPS register range. Reading an unwritten invalid index returns `undefined`, while writing index `32` stores a value at that array position.
+
+## Test Result
+
+The RegisterUnit test suite was executed with:
+
+```bash
+npm test -- tests/registerUnit.test.ts --runInBand
+```
+
+Expected result:
+
+```text
+Test Suites: 1 passed, 1 total
+Tests:       31 passed, 31 total
+Snapshots:   0 total
+```
+
+This result means all 31 RegisterUnit unit tests passed successfully, so the tested register initialization, reading, writing, `$zero`, and 32-bit conversion behavior match the expected behavior.
+
+## Test Evidence Screenshot
+
+Insert the screenshot of the RegisterUnit terminal test execution here, right after this paragraph.
+
+Suggested location for the image file:
+
+```text
+docs/screenshots/registerunit-test-results.png
+```
+
+Markdown line to use after saving the screenshot:
+
+```md
+![RegisterUnit unit test results](docs/screenshots/registerunit-test-results.png)
+```
