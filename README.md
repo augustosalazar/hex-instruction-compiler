@@ -220,3 +220,52 @@ This result means all 33 parser unit tests passed successfully, so the tested he
 
 ![Parser unit test results](docs/screenshots/parser-test-results.png)
 
+# DECODER UNIT TESTS
+
+A unit test suite was added for the instruction decoder in `tests/decoder.test.ts`. The goal of this file is to validate the decode path in `MIPSv6Processor.decode()` independently from execution, so the test suite checks how raw 32-bit hexadecimal words are classified and mapped into the generic instruction structure used by the simulator.
+
+The suite is organized under the `MIPSv6 Instruction Decoder` describe block and covers:
+
+1. R-type decoding for arithmetic and control instructions such as `ADD`, `SUB`, `AND`, `OR`, `XOR`, `NOR`, `SLT`, `NOP`, `DIV`, `MOD`, `MUL`, and `MUH`.
+2. I-type decoding for `ADDIU`, `ANDI`, `ORI`, `XORI`, `SLTI`, `LW`, `SW`, `BEQ`, and `BNE`.
+3. J-type decoding for `J` and `BC`.
+4. Bit extraction using `extractBits()` for different offsets and widths.
+5. Normalized instruction structure fields such as `op`, `type`, `operand1`, `operand2`, and `target`.
+6. Unknown-instruction error handling and the exact error message produced by the decoder.
+7. Classroom-style instruction examples used throughout the project.
+
+## What This Test Means
+
+These tests confirm that the decoder behaves like the front end of the MIPS v6 simulator:
+
+- It extracts `opcode`, `funct`, and `shamt` from the raw instruction word.
+- It resolves the right instruction definition from `INSTRUCTION_DEFINITIONS`.
+- It maps the instruction into the generic format expected by the execution pipeline.
+- It reports clear errors when the word does not match any supported instruction.
+
+This matters because the decoder is the step that turns hexadecimal machine code into the structured form later consumed by execution, ALU, memory, and register operations.
+
+## Test Result
+
+The decoder test suite was executed with:
+
+```bash
+npx jest tests/decoder.test.ts --runInBand --silent
+```
+
+Verified result:
+
+```text
+Test Suites: 1 passed, 1 total
+Tests:       22 passed, 22 total
+Snapshots:   0 total
+```
+
+This result means the decoder tests are passing and the current implementation correctly handles the covered R-, I-, and J-type cases, helper extraction behavior, and error reporting.
+
+## Test Evidence Screenshot
+
+Guarda la captura de esta prueba en `docs/screenshots/decoder-test-results.png` y colócala justo debajo de este encabezado para mantener el mismo formato que las otras suites de pruebas.
+
+![Decoder unit test results](docs/screenshots/decoder-test-results.png)
+
