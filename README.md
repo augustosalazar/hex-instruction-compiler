@@ -220,3 +220,68 @@ This result means all 33 parser unit tests passed successfully, so the tested he
 
 ![Parser unit test results](docs/screenshots/parser-test-results.png)
 
+# MIPS INSTRUCTION SEMANTICS UNIT TESTS
+
+A unit and integration test suite was added for the MIPS v6 instruction semantics in `tests/semantics.test.ts`. The goal of this test file is to validate the behavior defined in `src/isa/mipsv6/semantics.ts`: what each decoded instruction does when it reaches the execute stage.
+
+The suite is organized under the `MIPS Instruction Semantics` describe block and covers:
+
+1. R-type arithmetic instructions: `ADD`, `ADDU`, `SUB`, `SUBU`, `MUL`, `MUH`, `MULU`, `MUHU`, `DIV`, `DIVU`, `MOD`, and `MODU`.
+2. R-type logical instructions: `AND`, `OR`, `XOR`, and `NOR`.
+3. R-type comparison instructions: `SLT` and `SLTU`.
+4. I-type arithmetic, logical, and comparison instructions: `ADDIU`, `ANDI`, `ORI`, `XORI`, `SLTI`, and `SLTIU`.
+5. Memory access instructions: `LW` and `SW`.
+6. Branch and jump instructions: `BEQ`, `BNE`, `BGTZC`, `BLTZ`, `J`, and `BC`.
+7. Special behavior for `NOP`, `$zero`, delay slots, division by zero, memory bounds, and 32-bit boundary values.
+8. Real classroom-style hex programs executed through `MIPSv6Processor`, `parseHexProgram`, `singleCycle`, and `singleCycleRun`.
+
+## What This Test Means
+
+These tests confirm that each semantic function returns the expected execution output and that the processor stages apply that output correctly:
+
+- ALU-style instructions produce the correct `aluResult` and write to the expected target register.
+- Signed operations are checked with a signed 32-bit view, while the register file still stores values as unsigned 32-bit words.
+- Load/store instructions compute the effective address and move values between memory and registers correctly.
+- Branches and jumps report whether a jump is taken and whether a delay slot applies.
+- `NOP` leaves register and memory state unchanged.
+- Writes to `$zero` are ignored, preserving the MIPS invariant that register 0 always reads as `0`.
+- Error cases such as division by zero and out-of-range memory access throw errors.
+
+This test sits between low-level component tests and full program tests. The ALU tests prove individual math helpers work; the semantics tests prove decoded MIPS instructions connect those helpers to registers, memory, PC jumps, and writeback behavior.
+
+## Test Result
+
+The semantics test suite was executed with:
+
+```bash
+npm test -- tests/semantics.test.ts --runInBand
+```
+
+Result:
+
+```text
+Test Suites: 1 passed, 1 total
+Tests:       57 passed, 57 total
+Snapshots:   0 total
+```
+
+The full Jest suite was also executed with:
+
+```bash
+npm test -- --runInBand
+```
+
+Result:
+
+```text
+Test Suites: 7 passed, 7 total
+Tests:       251 passed, 251 total
+Snapshots:   0 total
+```
+
+This result means the new semantics coverage passed and did not break the existing ALU, RegisterUnit, MemoryUnit, Parser, processor, or branch/jump tests.
+
+## Test Evidence Screenshot
+
+![MIPS instruction semantics test results](docs/screenshots/semantics-test-results.png)
+
