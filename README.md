@@ -48,4 +48,4 @@ Valentina Schotborgh
 
 ## Credits
 
-This project was developed under the guidance and support of **OpenLab** — the open innovation and engineering lab that fosters collaborative software development, computer architecture research, and applied systems programming.
+This project was developed under the guidance and support of **Augusto Salazar Silva**.
