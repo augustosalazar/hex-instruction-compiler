@@ -5,11 +5,11 @@ import { extractBits } from "../helpers/bits.helper";
 import { decodeByFormat } from "../helpers/instruction.helper";
 import { INSTRUCTION_DEFINITIONS } from "../isa/mipsv6";
 import { semantics } from "../isa/mipsv6/semantics";
+import { MIPS_NOP, mipsGetReadRegisters, mipsGetWriteRegister, mipsIsLoadInstruction } from "../isa/mipsv6/pipeline-helpers";
 import type {
     Processor,
     InstructionReturn,
     Program,
-    ExecuteOutput,
     MemoryOutput,
     Instruction,
     ExecutionContext,
@@ -72,40 +72,67 @@ export default class MIPSv6Processor implements Processor {
         };
     }
 
-    execute(decoded: Instruction, ctx: ExecutionContext): ExecuteOutput {
+    execute(
+        decoded: Instruction,
+        ctx: ExecutionContext,
+        forwarded?: ReadonlyMap<number, number>,
+        executionPC?: number,
+    ): MemoryOperationExecuteOutput {
         const semanticFn = semantics[decoded.op];
 
         if (!semanticFn) {
             throw new Error(`Unimplemented execute semantic: ${decoded.op}`);
         }
 
-        return semanticFn(decoded, ctx);
-    }
+        // Save and override ctx.pc if the runner provides an effective PC for this
+        // instruction (e.g. branch target calculation needs PC+4, not the current pipeline PC).
+        const savedPC = ctx.pc;
+        if (executionPC !== undefined) ctx.pc = executionPC;
 
-    memoryAccess(execResult: ExecuteOutput, ctx: ExecutionContext): MemoryOutput {
-        const exec = execResult as MemoryOperationExecuteOutput;
-
-        if (exec.hasJump) {
-            return { valueToWrite: exec.aluResult, hasJump: exec.hasJump, hasDelay: exec.hasDelay };
+        // Apply forwarded register values for this cycle.
+        // We temporarily override the register file so the semantic function
+        // reads the forwarded value without any changes to its own logic.
+        const saved = new Map<number, number>();
+        if (forwarded) {
+            for (const [reg, val] of forwarded) {
+                saved.set(reg, ctx.registers.read(reg));
+                ctx.registers.write(reg, val);
+            }
         }
 
-        if (exec.storeValue !== undefined) {
-            ctx.memory.write(exec.aluResult, exec.storeValue);
+        const result = semanticFn(decoded, ctx);
+
+        // Restore register file and PC to their real pipeline values.
+        for (const [reg, val] of saved) {
+            ctx.registers.write(reg, val);
+        }
+        if (executionPC !== undefined) ctx.pc = savedPC;
+
+        return result;
+    }
+
+    memoryAccess(execResult: MemoryOperationExecuteOutput, ctx: ExecutionContext): MemoryOutput {
+        if (execResult.hasJump) {
+            return { valueToWrite: execResult.aluResult, hasJump: execResult.hasJump, hasDelay: execResult.hasDelay };
+        }
+
+        if (execResult.storeValue !== undefined) {
+            ctx.memory.write(execResult.aluResult, execResult.storeValue);
             return { valueToWrite: 0 };
         }
 
-        if (exec.isLoad) {
-            const dato = ctx.memory.read(exec.aluResult);
+        if (execResult.isLoad) {
+            const dato = ctx.memory.read(execResult.aluResult);
             const result: MemoryOutput = { valueToWrite: dato };
-            if (exec.targetRegister !== undefined) {
-                result.targetRegister = exec.targetRegister;
+            if (execResult.targetRegister !== undefined) {
+                result.targetRegister = execResult.targetRegister;
             }
             return result;
         }
 
-        const result: MemoryOutput = { valueToWrite: exec.aluResult };
-        if (exec.targetRegister !== undefined) {
-            result.targetRegister = exec.targetRegister;
+        const result: MemoryOutput = { valueToWrite: execResult.aluResult };
+        if (execResult.targetRegister !== undefined) {
+            result.targetRegister = execResult.targetRegister;
         }
         return result;
     }
@@ -126,5 +153,23 @@ export default class MIPSv6Processor implements Processor {
                 ctx.pc = memResult.valueToWrite;
             }
         }
+    }
+
+    // ── Processor pipeline-support contract ───────────────────────────────────
+
+    nopInstruction(): Instruction {
+        return MIPS_NOP;
+    }
+
+    getReadRegisters(decoded: Instruction): number[] {
+        return mipsGetReadRegisters(decoded);
+    }
+
+    getWriteRegister(decoded: Instruction): number | undefined {
+        return mipsGetWriteRegister(decoded);
+    }
+
+    isLoadInstruction(decoded: Instruction): boolean {
+        return mipsIsLoadInstruction(decoded);
     }
 }

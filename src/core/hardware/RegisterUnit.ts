@@ -1,7 +1,8 @@
+import { IRegisterUnit } from "../../types/abstracts";
 import { RegisterDefinition } from "../../types/isa/registers-definition.interface";
 
 // register unit simulator type - instanced in main 'compile' function and passed to a Compiler when running
-export default class RegisterUnit {
+export default class RegisterUnit implements IRegisterUnit {
     private registers;
     private regDef: RegisterDefinition[];
 
