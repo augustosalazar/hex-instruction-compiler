@@ -611,3 +611,101 @@ This result means all 51 complete-program execution tests passed successfully, s
 ## Test Evidence Screenshot
 
 ![Single cycle run test results](docs/screenshots/single-cycle-run-test-results.png)
+
+# PIPELINE RUNNER TESTS
+
+A general pipeline runner test suite exists in `tests/pipeline.test.ts`. This file validates the broad behavior of the pipeline execution paths, without going into the detailed hazard-by-hazard coverage documented in `tests/pipelineHazard.test.ts`.
+
+The suite covers:
+
+1. Basic pipeline execution without branch-heavy control flow.
+2. Comparison between `pipelineRun()` and `singleCycleRun()` for simple, hazard-safe register results.
+3. Validation that `pipelineHazardRun()` matches `singleCycleRun()` for complete programs.
+4. Basic RAW forwarding behavior.
+5. Basic load-use behavior with stall insertion.
+6. Branch and jump behavior in a complete program.
+7. The `CompileOutput` contract returned by both pipeline runners.
+
+## What This Test Means
+
+These tests confirm that the pipeline runners work correctly in general execution scenarios:
+
+- `pipelineRun()` represents the basic pipelined runner and is useful for broad pipeline behavior where hazards are not the main focus.
+- `pipelineHazardRun()` represents the hazard-aware runner and should preserve the same architectural result as `singleCycleRun()` for complete programs.
+- The returned output exposes the expected `registryState`, `cycles`, and `time` fields.
+- Cycle counts include pipeline overhead and, for the hazard-aware runner, can also reflect stalls.
+
+The key difference between the two pipeline test files is scope: `pipeline.test.ts` proves that the pipeline runners work across representative programs, while `pipelineHazard.test.ts` proves in detail how specific hazards are detected and resolved.
+
+## Test Result
+
+The pipeline runner test suite can be executed with:
+
+```bash
+npm test -- tests/pipeline.test.ts --runInBand
+```
+
+## Test Evidence Screenshot
+
+![Pipeline runner test results](docs/screenshots/pipeline-test-results.png)
+
+
+# PIPELINE HAZARD TESTS
+
+A detailed hazard-focused test suite was added in `tests/pipelineHazard.test.ts`. This file complements `tests/pipeline.test.ts`: the existing pipeline test checks broad runner behavior, while this new suite isolates specific hazard types and verifies how `pipelineHazardRun()` resolves them.
+
+The suite is organized under the `Pipeline Hazard Detection and Resolution` describe block and covers:
+
+1. RAW data hazards with EX/MEM and MEM/WB forwarding.
+2. Multiple forwarded sources in the same instruction.
+3. Deep dependent ALU chains.
+4. Load-use hazards that require stall bubbles.
+5. Cases where load-use stalls should not be inserted.
+6. Control hazards for taken branches and jumps.
+7. Delay-slot behavior with pipeline flushes.
+8. Combined data and control hazards.
+9. Memory access/resource interaction cases.
+10. Hazard detection accuracy for destination registers, `$zero`, stores, and instructions with no register sources.
+11. Cycle-count impact of stalls.
+12. Classroom programs with memory and branch hazards.
+13. Forwarding path details for one-cycle and two-cycle producer/consumer distance.
+14. Stall insertion points and multiple stalls in sequence.
+15. Consistency between `pipelineHazardRun()` and `singleCycleRun()` for registers and memory.
+16. Performance characterization through IPC expectations.
+
+## What This Test Means
+
+These tests confirm that the hazard-aware pipeline preserves correct MIPS architectural behavior while instructions overlap in the pipeline:
+
+- ALU results are forwarded before they reach the register file.
+- Loaded values trigger a stall when the next instruction immediately needs them.
+- Branches and jumps flush incorrect speculative instructions.
+- Delay-slot instructions still execute when the ISA requires them.
+- `$zero` is excluded from hazard handling because it is immutable.
+- Stores and branches are not treated as register-producing instructions.
+- Final registers and memory match the sequential `singleCycleRun()` reference.
+
+This matters because a basic pipeline can execute faster but may read stale values. `pipelineHazardRun()` adds forwarding, stalls, and flushes so the pipelined execution remains correct even when programs contain dependencies.
+
+## Test Result
+
+The pipeline hazard test suite was executed with:
+
+```bash
+npm test -- tests/pipelineHazard.test.ts --runInBand
+```
+
+Verified result:
+
+```text
+Test Suites: 1 passed, 1 total
+Tests:       34 passed, 34 total
+Snapshots:   0 total
+```
+
+This result means all 34 hazard-focused tests passed successfully, so the tested forwarding, stall insertion, flush behavior, final register state, memory consistency, and performance expectations match the current implementation.
+
+## Test Evidence Screenshot
+
+![Pipeline hazard test results](docs/screenshots/pipeline-hazard-test-results.png)
+
