@@ -26,17 +26,17 @@ Supported runners at a glance:
 
 ### Developers
 
-Juan Borja
-Samuel Camargo
-Fatima Castro
-Juan Rojas
+Juan Borja  
+Samuel Camargo  
+Fatima Castro  
+Juan Rojas  
 
 ### QA / Testing
 
-Oscar Gil
-Jean Marthe
-Alberto Niebles
-Valentina Schotborgh
+Oscar Gil  
+Jean Marthe  
+Alberto Niebles  
+Valentina Schotborgh  
 
 ---
 
