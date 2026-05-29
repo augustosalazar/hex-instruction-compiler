@@ -1,7 +1,4 @@
 // Main entry point for the hex-instruction-compiler library
-
-import { MIPSv6Processor } from "./core";
-
 // Core architecture and runners
 export * from './core';
 
