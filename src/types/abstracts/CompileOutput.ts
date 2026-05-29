@@ -1,11 +1,15 @@
-import { InstructionReturn } from "./InstructionReturn";
-import RegisterUnit from "../../core/hardware/RegisterUnit";
+import { PipelineCycleSnapshot } from "./StageContext";
+import { SingleCycleSnapshot } from "./SingleCycleSnapshot";
+import { IRegisterUnit } from "./IRegisterUnit";
 
-//the return type for every main 'compile' function. (/core folder)
+// The return type for every main runner function (singleCycleRun, pipelineRun, pipelineHazardRun).
 
 export interface CompileOutput {
-    registryState: RegisterUnit | null,
-    cycles: number | null,
-    time: number | null,
-    pipelineStates?: InstructionReturn[] //cada columna es una tabla y cada fila es un ciclo de ejecucion
+    registryState: IRegisterUnit | null;
+    cycles: number | null;
+    time: number | null;
+    /** Cycle-by-cycle pipeline state. Populated by pipelineRun and pipelineHazardRun. */
+    pipelineStates?: PipelineCycleSnapshot[];
+    /** Per-instruction snapshots. Populated by singleCycleRun. */
+    singleCycleStates?: SingleCycleSnapshot[];
 }

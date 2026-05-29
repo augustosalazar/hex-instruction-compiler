@@ -1,20 +1,22 @@
-import type { Processor, CompileOutput, ExecutionContext, Program } from "../types/abstracts";
+import type { Processor, CompileOutput, ExecutionContext, Program, SingleCycleSnapshot } from "../types/abstracts";
 import { singleCycle } from "./singleCycle";
 
-// correr el Programa de manera secuencial
+// Runs the program sequentially — one instruction per cycle — and collects a
+// per-instruction history, making singleCycleRun consistent with pipelineRun
+// and pipelineHazardRun in returning a populated history field in CompileOutput.
 export function singleCycleRun(
     processor: Processor,
     program: Program,
-    ctx: ExecutionContext
+    ctx: ExecutionContext,
 ): CompileOutput {
     let cycles = 0;
     const start = performance.now();
+    const history: SingleCycleSnapshot[] = [];
 
     while (ctx.pc < program.instructions.length) {
-
-        //A single cycle just performs every Step in succession.
+        const pc = ctx.pc;
         singleCycle(processor, program, ctx);
-
+        history.push({ cycle: cycles, pc });
         cycles++;
     }
 
@@ -23,6 +25,7 @@ export function singleCycleRun(
     return {
         registryState: ctx.registers,
         time: end - start,
-        cycles: cycles,
-    }
+        cycles,
+        singleCycleStates: history,
+    };
 }
